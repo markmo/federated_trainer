@@ -23,7 +23,7 @@ class Coordinator(object):
         results = self.executor.run(executable=self._get_update_from_worker, args=args)
         # results = self._get_update_from_worker(*args)
         # logging.info('results:\n{}'.format(results))
-        return results
+        return np.asarray(results)
 
     def get_models_from_workers(self, workers):
         logging.info(self.get_models_from_workers.__name__)
@@ -31,15 +31,16 @@ class Coordinator(object):
         results = self.executor.run(executable=self._get_model_from_worker, args=args)
         # results = self._get_model_from_worker(*args)
         # logging.info('results:\n{}'.format(results))
-        return results
+        return np.asarray(results)
 
     def _build_data(self, worker, weights):
         logging.info(self._build_data.__name__)
-        return 'http://{}:{}/step'.format(worker['host'], self.worker_port), {'gradient': weights}
+        return 'http://{}:{}/step'.format(worker['host'], self.worker_port), {'gradient': weights.tolist()}
 
     def _send_gradients(self, data):
         logging.info(self._send_gradients.__name__)
         url, payload = data
+        logging.info('Calling {} with:\n{}'.format(url, payload))
         requests.put(url, json=payload)
 
     def _get_update_from_worker(self, data):
@@ -50,9 +51,14 @@ class Coordinator(object):
         payload = {'model_type': model_type, 'public_key': ''}
         logging.info('Calling {} with:\n{}'.format(url, payload))
         response = requests.post(url, json=payload)
-        return response.json()
+        result = response.json()
+        logging.info('result shape: {}'.format(np.shape(result)))
+        return result
 
     def _get_model_from_worker(self, url):
         logging.info(self._get_model_from_worker.__name__)
         logging.info('Calling {}'.format(url))
-        return requests.get(url).json()
+        response = requests.get(url)
+        result = response.json()
+        logging.info('result shape: {}'.format(np.shape(result)))
+        return result

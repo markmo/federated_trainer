@@ -1,6 +1,7 @@
 from coordinator import Coordinator
 from functools import reduce
 import logging
+import numpy as np
 import requests
 from threading import Thread
 
@@ -31,7 +32,7 @@ class FederatedTrainer(object):
         cb_url = '{}/{}'.format(remote_host, cb_endpoint)
         result = func(*args)
         logging.info('Calling {}'.format(cb_url))
-        requests.post(cb_url, json=result)
+        requests.post(cb_url, json=result.tolist())
 
     def _build_args(self, remote_addr, data):
         logging.info(self._build_args.__name__)
@@ -51,11 +52,16 @@ class FederatedTrainer(object):
         models = []
         for i in range(self.conf['n_epochs']):
             updates = self._get_updates(model_type, public_key)
+            logging.info('updates shape: {}'.format(updates.shape))
             updates = self._federated_averaging(updates)
+            logging.info('federated_averaging shape: {}'.format(updates.shape))
             self._send_global_model(updates)
             models = self._get_trained_models()
+            logging.info('models shape: {}'.format(models.shape))
 
-        return self._federated_averaging(models)
+        result = self._federated_averaging(models)
+        logging.info('federated_averaging final shape: {}'.format(result.shape))
+        return result
 
     def _get_updates(self, model_type, public_key):
         logging.info(self._get_updates.__name__)

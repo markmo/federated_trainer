@@ -5,6 +5,8 @@ federated_trainer
 
    Encryption and differential privacy hasn't been setup yet.
 
+.. image:: ./static/federated_training_seq_diagram.png
+
 
 Running
 -------

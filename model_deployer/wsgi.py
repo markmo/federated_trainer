@@ -1,4 +1,4 @@
-from model_runner.app import app
+from model_deployer.app import app
 
 
 if __name__ == '__main__':

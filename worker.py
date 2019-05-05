@@ -21,9 +21,12 @@ class Worker(object):
     def process(self, model_type):
         logging.info(self.process.__name__)
         x, y = self.data_loader.get_data()
+        logging.info('x shape: {}'.format(x.shape))
         self.model = self.model if self.model else ModelFactory.get_model(model_type)(x, y)
         # logging.info('model: {}'.format(self.model))
-        return self.model.compute_gradient()
+        grad = self.model.compute_gradient()
+        logging.info('grad shape: {}'.format(grad.shape))
+        return grad
 
     def register(self):
         logging.info(self.register.__name__)
@@ -33,7 +36,7 @@ class Worker(object):
 
     def step(self, weights):
         logging.info(self.step.__name__)
-        self.model.gradient_step(weights, float(self.conf['eta']))
+        self.model.gradient_step(np.asarray(weights), float(self.conf['eta']))
 
     def get_registration_number(self):
         logging.info(self.get_registration_number.__name__)

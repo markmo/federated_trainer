@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 import logging
 from logging.config import dictConfig
 from model_factory import ModelFactory, ModelType
-from model_runner.config import conf
+from model_deployer.config import conf
 import numpy as np
 import requests
 
@@ -30,8 +30,9 @@ dictConfig({
 
 app = Flask(__name__)
 
-x_train, y_train, x_test, y_test = DataLoader().load_data()
+x_train, y_train, x_test, y_test = DataLoader().load_diabetes_data()
 model = ModelFactory.get_model(ModelType.LINEAR_REGRESSION.name)(x_train, y_train)
+logging.info('x_train shape: {}'.format(x_train.shape))
 
 
 @app.route('/finished', methods=['POST'])
