@@ -3,7 +3,14 @@ federated_trainer
 
 1. Setup the scaffolding of a basic implementation of federated training
 
-   Encryption and differential privacy hasn't been setup yet.
+2. Added Homomorphic Encryption (`Paillier crypto system <https://en.wikipedia.org/wiki/Paillier_cryptosystem>`_)
+
+3. Started UI components. Instead of React, using the `Svelte / Sapper framework <https://sapper.svelte.dev/>`_.
+   Investigating if faster, smaller, and simpler. Svelte uses a novel approach of compiling to optimized
+   Javascript instead of runtime processing of a virtual DOM as with React. In theory, this means that
+   packaged code will be significantly smaller and faster. Svelte is reactive and influenced by Elm.
+
+Differential privacy hasn't been setup yet.
 
 .. image:: ./static/federated_training_seq_diagram.png
 
@@ -40,3 +47,10 @@ Running
        curl -X POST "http://localhost:9090/model"
 
    This initiates model deployment. The default Linear Regression model is run in a federated fashion.
+
+6. When the process completes, in the fourth tab, run the following to get the final cost metric
+   and predicted values.
+   ::
+
+       curl "http://localhost:9090/prediction"
+

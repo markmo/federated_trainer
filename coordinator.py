@@ -6,9 +6,11 @@ import requests
 
 class Coordinator(object):
 
-    def __init__(self, worker_port):
+    def __init__(self, worker_port, encryption_service, encryption_active):
         logging.info('init with worker_port={}'.format(worker_port))
         self.worker_port = worker_port
+        self.encryption_service = encryption_service
+        self.encryption_active = encryption_active
         self.executor = AsyncThreadPoolExecutor()
 
     def send_gradients(self, workers, weights):
@@ -19,7 +21,7 @@ class Coordinator(object):
 
     def get_updates_from_workers(self, workers, model_type, public_key):
         logging.info(self.get_updates_from_workers.__name__)
-        args = [(worker, model_type) for worker in workers]
+        args = [(worker, model_type, public_key) for worker in workers]
         results = self.executor.run(executable=self._get_update_from_worker, args=args)
         # results = self._get_update_from_worker(*args)
         # logging.info('results:\n{}'.format(results))
@@ -41,18 +43,24 @@ class Coordinator(object):
         logging.info(self._send_gradients.__name__)
         url, payload = data
         logging.info('Calling {} with:\n{}'.format(url, payload))
+        if self.encryption_active:
+            payload = {'gradient': self.encryption_service.get_serialized_collection(payload['gradient'])}
+
         requests.put(url, json=payload)
 
     def _get_update_from_worker(self, data):
         logging.info(self._get_update_from_worker.__name__)
         # logging.info('data: {}'.format(data))
-        worker, model_type = data
+        worker, model_type, public_key = data
         url = 'http://{}:{}/weights'.format(worker['host'], self.worker_port)
-        payload = {'model_type': model_type, 'public_key': ''}
+        payload = {'model_type': model_type, 'public_key': public_key}
         logging.info('Calling {} with:\n{}'.format(url, payload))
         response = requests.post(url, json=payload)
         result = response.json()
         logging.info('result shape: {}'.format(np.shape(result)))
+        if self.encryption_active:
+            result = self.encryption_service.get_deserialized_collection(result)
+
         return result
 
     def _get_model_from_worker(self, url):
@@ -61,4 +69,7 @@ class Coordinator(object):
         response = requests.get(url)
         result = response.json()
         logging.info('result shape: {}'.format(np.shape(result)))
+        if self.encryption_active:
+            result = self.encryption_service.get_deserialized_collection(result)
+
         return result

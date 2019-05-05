@@ -31,11 +31,25 @@ class LinearRegression(object):
         logging.info('self.x shape: {}'.format(self.x.shape))
         pred = self.predict(self.x)
         logging.info('pred shape: {}'.format(pred.shape))
-        delta = pred - self.y
-        logging.info('delta shape: {}'.format(delta.shape))
-        return delta.dot(self.x) / len(self.x)
+        error = pred - self.y
+        logging.info('error shape: {}'.format(error.shape))
+
+        # can't handle EncryptedNumbers
+        # cost = self.calculate_cost(error)
+        # logging.info('cost: {}'.format(cost))
+        # mse = mean_squared_error(pred, self.y)
+        # logging.info('mse: {}'.format(mse))
+
+        return error.dot(self.x) / len(self.x)
+
+    def calculate_cost(self, error):
+        return 1 / (2 * len(self.x)) * np.dot(error.T, error)
 
     def predict(self, x):
         logging.info(self.predict.__name__)
         logging.info('self.weights shape: {}'.format(self.weights.shape))
         return x.dot(self.weights)
+
+
+def mean_squared_error(y_pred, y):
+    return np.mean((y_pred - y)**2)

@@ -1,3 +1,4 @@
+from encryption_service import EncryptionService
 from federated_trainer import FederatedTrainer
 from federated_training.config import conf
 from flask import Flask, jsonify, request
@@ -27,7 +28,8 @@ dictConfig({
 
 app = Flask(__name__)
 
-federated_trainer = FederatedTrainer(conf)
+encryption_service = EncryptionService(conf['encryption'])
+federated_trainer = FederatedTrainer(encryption_service, conf)
 
 
 @app.route('/workers', methods=['GET'])

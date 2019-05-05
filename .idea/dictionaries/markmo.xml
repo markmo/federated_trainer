@@ -2,10 +2,13 @@
   <dictionary name="markmo">
     <words>
       <w>asctime</w>
+      <w>ciphertext</w>
       <w>datasets</w>
       <w>deployer</w>
+      <w>dtype</w>
       <w>idxs</w>
       <w>levelname</w>
+      <w>paillier</w>
       <w>pythonpath</w>
     </words>
   </dictionary>

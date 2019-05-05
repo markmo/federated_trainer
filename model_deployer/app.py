@@ -1,4 +1,5 @@
 from data_loader import DataLoader
+from encryption_service import EncryptionService
 from flask import Flask, jsonify, request
 import logging
 from logging.config import dictConfig
@@ -30,6 +31,11 @@ dictConfig({
 
 app = Flask(__name__)
 
+encryption_service = EncryptionService(conf['encryption'])
+public_key, private_key = encryption_service.generate_key_pair(conf['key_length'])
+encryption_service.set_public_key(public_key.n)
+encryption_active = conf['encryption_active']
+
 x_train, y_train, x_test, y_test = DataLoader().load_diabetes_data()
 model = ModelFactory.get_model(ModelType.LINEAR_REGRESSION.name)(x_train, y_train)
 logging.info('x_train shape: {}'.format(x_train.shape))
@@ -39,6 +45,9 @@ logging.info('x_train shape: {}'.format(x_train.shape))
 def finished():
     logging.info(finished.__name__)
     weights = request.get_json()
+    if encryption_active:
+        weights = encryption_service.decrypt_and_deserialize_collection(private_key, weights)
+
     model.set_weights(weights)
     return jsonify(weights), 200
 
@@ -51,6 +60,7 @@ def make_model():
         'model_type': ModelType.LINEAR_REGRESSION.name,
         'cb_endpoint': 'finished',
         'cb_port': conf['port'],
+        'public_key': public_key.n,
     }
     logging.info('Calling {} with:\n{}'.format(registration_url, args))
     response = requests.post(registration_url, json=args)
@@ -62,9 +72,19 @@ def make_model():
 def get_prediction():
     logging.info(get_prediction.__name__)
     y_pred = model.predict(x_test)
-    loss = mse(y_pred, y_test)
-    logging.info('mse {}'.format(loss))
-    return jsonify({'pred': y_pred.tolist(), 'loss': loss})
+    mse = mean_squared_error(y_pred, y_test)
+    logging.info('mse: {}'.format(mse))
+    return jsonify({'pred': list(zip(y_pred.tolist(), model.y.tolist())), 'mse': mse})
+
+
+@app.route('/test', methods=['GET'])
+def test_model():
+    logging.info(test_model.__name__)
+    model.fit(n_epochs=200, eta=0.1)
+    y_pred = model.predict(x_test)
+    mse = mean_squared_error(y_pred, y_test)
+    logging.info('mse: {}'.format(mse))
+    return jsonify({'pred': list(zip(y_pred.tolist(), model.y.tolist())), 'mse': mse})
 
 
 @app.route('/ping', methods=['POST'])
@@ -73,7 +93,7 @@ def ping():
     return jsonify('pong'), 200
 
 
-def mse(y_pred, y):
+def mean_squared_error(y_pred, y):
     return np.mean((y - y_pred) ** 2)
 
 

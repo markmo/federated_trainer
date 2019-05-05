@@ -1,5 +1,6 @@
 from data_loader import DataLoader
 from data_owner.config import conf
+from encryption_service import EncryptionService
 from flask import Flask, jsonify, request
 import logging
 from logging.config import dictConfig
@@ -31,9 +32,12 @@ dictConfig({
 
 app = Flask(__name__)
 
+encryption_service = EncryptionService(conf['encryption'])
+encryption_active = conf['encryption_active']
+
 data_loader = DataLoader()
 data_loader.load_data()
-worker = Worker(conf, data_loader)
+worker = Worker(conf, data_loader, encryption_service)
 
 
 @app.route('/datasets', methods=['POST'])
@@ -50,7 +54,11 @@ def upload_data():
 @app.route('/weights', methods=['GET'])
 def get_weights():
     logging.info(get_weights.__name__)
-    return jsonify(worker.get_weights()), 200
+    result = worker.get_weights()
+    if encryption_active:
+        result = encryption_service.get_serialized_collection(result)
+
+    return jsonify(result), 200
 
 
 @app.route('/weights', methods=['POST'])
@@ -58,13 +66,21 @@ def process_weights():
     logging.info(process_weights.__name__)
     data = request.get_json()
     model_type = data['model_type']
-    return jsonify(worker.process(model_type).tolist()), 200
+    public_key = data['public_key']
+    result = worker.process(model_type, public_key)
+    if encryption_active:
+        result = encryption_service.get_serialized_encrypted_collection(result)
+
+    return jsonify(result), 200
 
 
 @app.route('/step', methods=['PUT'])
 def gradient_step():
     logging.info(gradient_step.__name__)
     data = request.get_json()['gradient']
+    if encryption_active:
+        data = encryption_service.get_deserialized_collection(data)
+
     worker.step(data)
     return jsonify('OK'), 200
 
