@@ -8,4 +8,5 @@ conf = {
     'registration_enabled': True,
     'encryption': PheEncryption,
     'encryption_active': True,
+    'precision': 1e-5,
 }

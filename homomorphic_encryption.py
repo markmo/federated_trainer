@@ -3,7 +3,7 @@ class HomomorphicEncryption(object):
     def generate_key_pair(self, key_length):
         pass
 
-    def encrypt_collection(self, public_key, collection):
+    def encrypt_collection(self, public_key, collection, precision):
         pass
 
     def decrypt_collection(self, private_key, collection):
@@ -19,4 +19,7 @@ class HomomorphicEncryption(object):
         pass
 
     def decrypt_value(self, private_key, value):
+        pass
+
+    def encode_collection(self, public_key, collection, precision):
         pass

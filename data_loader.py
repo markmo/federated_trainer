@@ -12,7 +12,7 @@ TEST_SET_RATIO = .15
 class DataLoader(object):
 
     def __init__(self):
-        logging.info('init')
+        logging.debug('init')
         self.x, self.y, self.x_test, self.y_test = None, None, None, None
         self.seed = 42
         np.random.seed(self.seed)

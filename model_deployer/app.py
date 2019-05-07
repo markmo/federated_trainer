@@ -38,12 +38,12 @@ encryption_active = conf['encryption_active']
 
 x_train, y_train, x_test, y_test = DataLoader().load_diabetes_data()
 model = ModelFactory.get_model(ModelType.LINEAR_REGRESSION.name)(x_train, y_train)
-logging.info('x_train shape: {}'.format(x_train.shape))
+logging.debug('x_train shape: {}'.format(x_train.shape))
 
 
 @app.route('/finished', methods=['POST'])
 def finished():
-    logging.info(finished.__name__)
+    logging.info(finished.__name__ + ' [POST]')
     weights = request.get_json()
     if encryption_active:
         weights = encryption_service.decrypt_and_deserialize_collection(private_key, weights)
@@ -54,23 +54,23 @@ def finished():
 
 @app.route('/model', methods=['POST'])
 def make_model():
-    logging.info(make_model.__name__)
+    logging.debug(make_model.__name__ + ' [POST]')
     registration_url = conf['server_registration_url']
-    args = {
+    payload = {
         'model_type': ModelType.LINEAR_REGRESSION.name,
         'cb_endpoint': 'finished',
         'cb_port': conf['port'],
         'public_key': public_key.n,
     }
-    logging.info('Calling {} with:\n{}'.format(registration_url, args))
-    response = requests.post(registration_url, json=args)
+    logging.info('Calling {} [POST] with:\n{}'.format(registration_url, payload))
+    response = requests.post(registration_url, json=payload)
     response.raise_for_status()
     return jsonify('OK'), 200
 
 
 @app.route('/prediction', methods=['GET'])
 def get_prediction():
-    logging.info(get_prediction.__name__)
+    logging.info(get_prediction.__name__ + ' [GET]')
     y_pred = model.predict(x_test)
     mse = mean_squared_error(y_pred, y_test)
     logging.info('mse: {}'.format(mse))
@@ -79,7 +79,7 @@ def get_prediction():
 
 @app.route('/test', methods=['GET'])
 def test_model():
-    logging.info(test_model.__name__)
+    logging.info(test_model.__name__ + ' [GET]')
     model.fit(n_epochs=200, eta=0.1)
     y_pred = model.predict(x_test)
     mse = mean_squared_error(y_pred, y_test)
@@ -89,11 +89,12 @@ def test_model():
 
 @app.route('/ping', methods=['POST'])
 def ping():
-    logging.info(ping.__name__)
+    logging.debug(ping.__name__ + ' [POST]')
     return jsonify('pong'), 200
 
 
 def mean_squared_error(y_pred, y):
+    """ :math:`1/m * \\sum_{i=1..m} (y_pred_i - y_i)^2` """
     return np.mean((y - y_pred) ** 2)
 
 

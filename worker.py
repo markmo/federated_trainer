@@ -16,34 +16,41 @@ class Worker(object):
         self.encryption_service = encryption_service
         self.registration_number = None
         self.model = None
+        # logging.info('registration_enabled: ' + str(conf['registration_enabled']))
         if conf['registration_enabled']:
             self.register()
 
     def process(self, model_type, public_key):
-        logging.info(self.process.__name__)
+        logging.debug(self.process.__name__)
         self.encryption_service.set_public_key(public_key)
         x, y = self.data_loader.get_data()
-        logging.info('x shape: {}'.format(x.shape))
+        logging.debug('x shape: {}'.format(x.shape))
         self.model = self.model if self.model else ModelFactory.get_model(model_type)(x, y)
         # logging.info('model: {}'.format(self.model))
         grad = self.model.compute_gradient()
-        logging.info('grad shape: {}'.format(grad.shape))
+
+        # clip gradients
+        # TypeError: '<=' not supported between instances of 'EncryptedNumber' and 'int'
+        # threshold = self.encryption_service.public_key.n
+        # grad = np.clip(grad, -threshold, threshold)
+
+        logging.debug('grad shape: {}'.format(grad.shape))
         return grad.tolist()
 
     def register(self):
-        logging.info(self.register.__name__)
+        logging.debug(self.register.__name__)
         data = {'id': self.worker_id}
         response = FederatedTrainerConnector(self.conf).register(data)
         self.registration_number = int(response['number']) - 1
 
     def step(self, weights):
-        logging.info(self.step.__name__)
+        logging.debug(self.step.__name__)
         self.model.gradient_step(np.asarray(weights), float(self.conf['eta']))
 
     def get_registration_number(self):
-        logging.info(self.get_registration_number.__name__)
+        logging.debug(self.get_registration_number.__name__)
         return self.registration_number
 
     def get_weights(self):
-        logging.info(self.get_weights.__name__)
+        logging.debug(self.get_weights.__name__)
         return self.model.weights.tolist()

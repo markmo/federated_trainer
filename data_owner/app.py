@@ -42,10 +42,10 @@ worker = Worker(conf, data_loader, encryption_service)
 
 @app.route('/datasets', methods=['POST'])
 def upload_data():
-    logging.info(upload_data.__name__)
+    logging.debug(upload_data.__name__ + ' [POST]')
     file = request.files.get('file')
     logging.info('Uploading file {}'.format(file.filename))
-    logging.info(file)
+    # logging.info(file)
     file.save(THIS_DIR / 'data/data.csv')
     file.close()
     return jsonify('OK'), 200
@@ -53,7 +53,7 @@ def upload_data():
 
 @app.route('/weights', methods=['GET'])
 def get_weights():
-    logging.info(get_weights.__name__)
+    logging.info(get_weights.__name__ + ' [GET]')
     result = worker.get_weights()
     if encryption_active:
         result = encryption_service.get_serialized_collection(result)
@@ -63,20 +63,20 @@ def get_weights():
 
 @app.route('/weights', methods=['POST'])
 def process_weights():
-    logging.info(process_weights.__name__)
+    logging.info(process_weights.__name__ + ' [POST]')
     data = request.get_json()
     model_type = data['model_type']
     public_key = data['public_key']
     result = worker.process(model_type, public_key)
     if encryption_active:
-        result = encryption_service.get_serialized_encrypted_collection(result)
+        result = encryption_service.get_serialized_encrypted_collection(result, conf['precision'])
 
     return jsonify(result), 200
 
 
 @app.route('/step', methods=['PUT'])
 def gradient_step():
-    logging.info(gradient_step.__name__)
+    logging.info(gradient_step.__name__ + ' [PUT]')
     data = request.get_json()['gradient']
     if encryption_active:
         data = encryption_service.get_deserialized_collection(data)
@@ -87,7 +87,7 @@ def gradient_step():
 
 @app.route('/ping', methods=['POST'])
 def ping():
-    logging.info(ping.__name__)
+    logging.debug(ping.__name__ + ' [POST]')
     return jsonify('pong'), 200
 
 

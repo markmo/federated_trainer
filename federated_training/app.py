@@ -34,13 +34,13 @@ federated_trainer = FederatedTrainer(encryption_service, conf)
 
 @app.route('/workers', methods=['GET'])
 def get_workers():
-    logging.info(get_workers.__name__)
+    logging.debug(get_workers.__name__ + ' [GET]')
     return jsonify([str(worker) for worker in federated_trainer.workers])
 
 
 @app.route('/workers', methods=['POST'])
 def register_worker():
-    logging.info(register_worker.__name__)
+    logging.debug(register_worker.__name__ + ' [POST]')
     data = request.get_json()
     data['host'], data['port'] = request.environ['REMOTE_ADDR'], request.environ['REMOTE_PORT']
     response = federated_trainer.register_worker(data)
@@ -50,7 +50,7 @@ def register_worker():
 
 @app.route('/models', methods=['POST'])
 def train_model():
-    logging.info(train_model.__name__)
+    logging.debug(train_model.__name__ + ' [POST]')
     data = request.get_json()
     remote_addr = request.environ['REMOTE_ADDR']
     logging.info('Train model at {} with:\n{}'.format(remote_addr, data))
@@ -60,7 +60,7 @@ def train_model():
 
 @app.route('/ping', methods=['POST'])
 def ping():
-    logging.info(ping.__name__)
+    logging.debug(ping.__name__ + ' [POST]')
     return jsonify('pong'), 200
 
 
