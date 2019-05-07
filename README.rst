@@ -1,6 +1,19 @@
 federated_trainer
 =================
 
+In this scenario, I have three parties: Data Owner (may be many), Model Creator (aka Analytics Beneficiary),
+and Training Coordinator (aka Facilitating Party). The data used to train the model is owned by the Data
+Owners. No other party can see this data, including amongst multiple data owners. Only the Model Creator
+can see the model gradients. The Training Coordinator can see neither data or model gradients; their role
+is to facilitate the entire system by coordinating communications.
+
+This first simple version is using Homomorphic Encryption to hide gradients. The data doesn't move from the
+data owners. Simple HTTP REST communications is being used to coordinate actions amongst the various parties.
+
+
+Progress
+--------
+
 1. Setup the scaffolding of a basic implementation of federated training
 
 2. Added Homomorphic Encryption (`Paillier crypto system <https://en.wikipedia.org/wiki/Paillier_cryptosystem>`_)
@@ -26,7 +39,7 @@ Setup
 -----
 
 1. Install gmpy2. gmpy2 is an optimized, C-coded Python extension module that supports
-   fast multiple-precision arithmetic. (Drastically improves performance.)
+   fast multi-precision arithmetic. (Drastically improves performance.)
    ::
 
        brew install libmpc
@@ -91,11 +104,11 @@ Notes:
 
 *Why is the Paillier crypto system partially homomorphic?*
 
-It can not do multiplication in the plaintext domain using two ciphertexts. In other words,
+It cannot do multiplication in the plaintext domain using two ciphertexts. In other words,
 given :math:`E(m1)` and :math:`E(m2)`, you can not get :math:`E(m1\cdot m2)`. You can only
 get :math:`E(m1+m2)`.
 
-Given :math:`E(m1)` and :math:`m2`, you can get :math:`E(m1\cdot m2)` however. But notice
+Given :math:`E(m1)` and :math:`m2`, you can get :math:`E(m1\cdot m2)` however, but notice
 that :math:`m2` in this case was not encrypted.
 
 *Overflow errors*
@@ -129,7 +142,7 @@ mathematical operations supported by the Paillier encryption:
 * Addition of two :class:`~phe.paillier.EncryptedNumber` instances
 * Multiplication of an :class:`~phe.paillier.EncryptedNumber` by a scalar
 
-Numpy operations that rely only on these operations are also allowed:
+Numpy operations that rely only on these operations are also allowed, for example:
 ::
 
     import numpy as np
