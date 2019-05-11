@@ -53,10 +53,7 @@ class FederatedTrainer(object):
             logging.info('Epoch {}'.format(i + 1))
             params = self._send_global_update(params)
 
-            # combine with update above
-            # params = self._get_trained_models()
-            # logging.debug('params shape: {}'.format(params.shape))
-
+            # federated averaging
             params = self._federated_average(params)
             if self.encryption_active:
                 updates = self.encryption_service.get_serialized_collection(params)
@@ -84,10 +81,6 @@ class FederatedTrainer(object):
             return updates[0]
 
         return reduce(sum_collection, updates) / len(self.workers)
-
-    # def _get_trained_models(self):
-    #     logging.debug(self._get_trained_models.__name__)
-    #     return self.data_owner_connector.get_params_from_workers(self.workers)
 
 
 def sum_collection(x, y):

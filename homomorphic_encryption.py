@@ -1,4 +1,5 @@
 class HomomorphicEncryption(object):
+    """ Protocol for crypto implementations such as `PheEncryption` """
 
     def generate_key_pair(self, key_length):
         pass

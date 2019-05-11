@@ -32,8 +32,6 @@ class ModelOwner(object):
         data = {
             'model_id': model.id,
             'model_type': model_type,
-            # 'callback_endpoint': 'model_finished',
-            # 'callback_port': self.port,
             'public_key': self.public_key.n,
         }
         if logging.getLogger().getEffectiveLevel() == 'DEBUG':
