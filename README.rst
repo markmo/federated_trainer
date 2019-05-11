@@ -1,8 +1,8 @@
 federated_trainer
 =================
 
-In this scenario, I have three parties: Data Owner (may be many), Model Creator (aka Analytics Beneficiary),
-and Training Coordinator (aka Facilitating Party). The data used to train the model is owned by the Data
+In this scenario, I have three parties: Data Owner (may be many), Model Owner (beneficiary of the analytics),
+and Facilitator (aka Learning Server). The data used to train the model is owned by the Data
 Owners. No other party can see this data, including amongst multiple data owners. Only the Model Creator
 can see the model gradients. The Training Coordinator can see neither data or model gradients; their role
 is to facilitate the entire system by coordinating communications.
@@ -18,12 +18,31 @@ Progress
 
 2. Added Homomorphic Encryption (`Paillier crypto system <https://en.wikipedia.org/wiki/Paillier_cryptosystem>`_)
 
+   Having a real issue with overflow (see below). When two numbers with fractional parts are multiplied,
+   the mantissa grows. The Paillier crypto library is maintaining an exact result, whereas normally the
+   result is rounded to the nearest floating point number that can be represented with the available bits.
+   Machine learning algorithms are iterative, therefore the size of parameter values resulting from the
+   arithmetic operations is growing such that when deserialized, after being serialized to send across
+   HTTP, an overflow error is occurring when trying to represent the mantissa as an int.
+
+   As a workaround, I introduced an extra communications step to update the model owner during training
+   so that the parameters can be decrypted and therefore hopefully reset the representation. This approach
+   seems to make only a mild improvement.
+
+   The library authors demonstrate a machine learning `example <https://blog.n1analytics.com/distributed-machine-learning-and-partially-homomorphic-encryption-2/>`_,
+   however this example does not use serialization-deserialization of the encrypted values, so doesn't appear
+   to run into this same issue.
+
+   If this library is not suitable, I could try an alternative one.
+
 3. Started UI components. Instead of React, using the `Svelte / Sapper framework <https://sapper.svelte.dev/>`_.
    Investigating if faster, smaller, and simpler. Svelte uses a novel approach of compiling to optimized
    Javascript instead of runtime processing of a virtual DOM as with React. In theory, this means that
    packaged code will be significantly smaller and faster. Svelte is reactive and influenced by Elm.
 
 Differential privacy hasn't been setup yet.
+
+TODO: update the following
 
 .. image:: ./static/federated_training_seq_diagram.png
 
@@ -88,7 +107,7 @@ Running
 5. In the fourth tab, run:
    ::
 
-       curl -X POST "http://localhost:9090/model"
+       curl -H "Content-Type: application/json" -X POST "localhost:9090/models" --data @model_owners/examples/model.json
 
    This initiates model deployment. The default Linear Regression model is run in a federated fashion.
 
@@ -116,7 +135,9 @@ that :math:`m2` in this case was not encrypted.
     Overflows are a consequence of the encoding scheme.
 
     The Paillier cryptosystem allows arithmetic over the integers modulo n. That is the numbers {0, 1, ..., n-1}.
+
     And thus, n-1 + 2 = 1 mod n
+
     or, the numbers "wrap around".
 
     Our encoding scheme maps floating point numbers onto the integers in such a way that it preserves arithmetic.
@@ -148,3 +169,16 @@ Numpy operations that rely only on these operations are also allowed, for exampl
     import numpy as np
     enc_mean = np.mean(encrypted_number_list)
     enc_dot = np.dot(encrypted_number_list, [2, -400.1, 5318008])
+
+
+Feature types:
+
+* Numeric
+
+  * Continuous. Observations can take any value between a certain set of real numbers.
+  * Discrete. Observations can take a value based on a count from a set of distinct whole values.
+
+* Categorical
+
+  * Ordinal. Observations can take a value that can be logically ordered or ranked.
+  * Nominal. Observations can take a value that is not able to be organized in a logical sequence.

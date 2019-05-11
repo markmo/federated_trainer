@@ -1,5 +1,6 @@
-from homomorphic_encryption import HomomorphicEncryption
 import phe as paillier
+
+from homomorphic_encryption import HomomorphicEncryption
 
 
 class PheEncryption(HomomorphicEncryption):
@@ -36,6 +37,3 @@ class PheEncryption(HomomorphicEncryption):
 
     def decrypt_value(self, private_key, value):
         return private_key.decrypt(value)
-
-    def encode_collection(self, public_key, collection, precision=1e-5):
-        return [paillier.EncryptedNumber.encode(public_key, x, precision) for x in collection]

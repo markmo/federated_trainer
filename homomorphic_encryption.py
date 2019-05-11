@@ -20,6 +20,3 @@ class HomomorphicEncryption(object):
 
     def decrypt_value(self, private_key, value):
         pass
-
-    def encode_collection(self, public_key, collection, precision):
-        pass

@@ -1,7 +1,8 @@
 import logging
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
 from sklearn.datasets import load_diabetes, load_iris
 
 ROOT_DIR = Path(__file__).parent
@@ -53,7 +54,8 @@ class DataLoader(object):
         logging.info(self.get_data.__name__)
         return self.x, self.y
 
-    def prepare_data(self, x, y):
+    @staticmethod
+    def prepare_data(x, y):
         # add constant for intercept
         x = np.c_[x, np.ones(x.shape[0])]
 

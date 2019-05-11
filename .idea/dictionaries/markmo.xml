@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="markmo">
     <words>
+      <w>asarray</w>
       <w>asctime</w>
       <w>ciphertext</w>
       <w>ciphertexts</w>
@@ -8,9 +9,11 @@
       <w>datasets</w>
       <w>deployer</w>
       <w>dtype</w>
+      <w>errorhandler</w>
       <w>idxs</w>
       <w>levelname</w>
       <w>paillier</w>
+      <w>preprocessing</w>
       <w>pythonpath</w>
     </words>
   </dictionary>

@@ -1,8 +1,9 @@
 import logging
+
 import requests
 
 
-class FederatedTrainerConnector(object):
+class FacilitatorConnector(object):
 
     def __init__(self, conf):
         logging.debug('init with:\n{}'.format(conf))

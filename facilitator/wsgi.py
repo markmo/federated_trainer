@@ -1,4 +1,4 @@
-from data_owner.app import app
+from facilitator.app import app
 
 
 if __name__ == '__main__':

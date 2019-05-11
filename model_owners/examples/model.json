@@ -1,0 +1,73 @@
+{
+  "model_type": "LINEAR_REGRESSION",
+  "data_props": {
+    "header": "false",
+    "features": [
+      {
+        "col_idx": 0,
+        "type": "continuous",
+        "description": "age of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 1,
+        "type": "continuous",
+        "description": "sex of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 2,
+        "type": "continuous",
+        "description": "body mass index of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 3,
+        "type": "continuous",
+        "description": "average blood pressure of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 4,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 5,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 6,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 7,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 8,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      },
+      {
+        "col_idx": 9,
+        "type": "continuous",
+        "description": "blood serum measurement of patient",
+        "range": [-2, 2]
+      }
+    ],
+    "target": {
+      "col_idx": 10,
+      "description": "A quantitative measure of disease progression one year after baseline.",
+      "range": [25, 346]
+    }
+  }
+}

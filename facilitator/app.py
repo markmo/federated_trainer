@@ -1,29 +1,13 @@
-from encryption_service import EncryptionService
-from federated_trainer import FederatedTrainer
-from federated_training.config import conf
-from flask import Flask, jsonify, request
 import logging
 from logging.config import dictConfig
 
-dictConfig({
-    'version': 1,
-    'formatters': {
-        'default': {
-            'format': '[%(asctime)s] %(levelname)s %(module)s: %(message)s'
-        }
-    },
-    'handlers': {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-        }
-    },
-    'root': {
-        'level': 'INFO',
-        'handlers': ['wsgi']
-    }
-})
+from flask import Flask, jsonify, request
+
+from encryption_service import EncryptionService
+from facilitator.config import conf, logging_conf
+from facilitator.federated_trainer import FederatedTrainer
+
+dictConfig(logging_conf)
 
 
 app = Flask(__name__)
@@ -34,13 +18,13 @@ federated_trainer = FederatedTrainer(encryption_service, conf)
 
 @app.route('/workers', methods=['GET'])
 def get_workers():
-    logging.debug(get_workers.__name__ + ' [GET]')
+    logging.info('-> ' + get_workers.__name__ + ' [GET]')
     return jsonify([str(worker) for worker in federated_trainer.workers])
 
 
 @app.route('/workers', methods=['POST'])
 def register_worker():
-    logging.debug(register_worker.__name__ + ' [POST]')
+    logging.info('-> ' + register_worker.__name__ + ' [POST]')
     data = request.get_json()
     data['host'], data['port'] = request.environ['REMOTE_ADDR'], request.environ['REMOTE_PORT']
     response = federated_trainer.register_worker(data)
@@ -50,17 +34,17 @@ def register_worker():
 
 @app.route('/models', methods=['POST'])
 def train_model():
-    logging.debug(train_model.__name__ + ' [POST]')
+    logging.info('-> ' + train_model.__name__ + ' [POST]')
     data = request.get_json()
     remote_addr = request.environ['REMOTE_ADDR']
-    logging.info('Train model at {} with:\n{}'.format(remote_addr, data))
+    logging.info('Train model at {}:{} with:\n{}'.format(remote_addr, conf['worker_port'], data))
     federated_trainer.process(remote_addr, data)
     return jsonify('OK'), 200
 
 
 @app.route('/ping', methods=['POST'])
 def ping():
-    logging.debug(ping.__name__ + ' [POST]')
+    logging.debug('-> ' + ping.__name__ + ' [POST]')
     return jsonify('pong'), 200
 
 

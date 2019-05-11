@@ -1,4 +1,4 @@
-from model_deployer.app import app
+from data_owners.app import app
 
 
 if __name__ == '__main__':

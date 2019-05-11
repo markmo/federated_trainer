@@ -38,6 +38,3 @@ class EncryptionService(object):
 
     def __get_deserialized_encrypted_value(self, value):
         return self.encryption.get_encrypted_number(self.public_key, value)
-
-    def encode_collection(self, collection, precision=1e-5):
-        return self.encryption.encode_collection(self.public_key, collection, precision)
